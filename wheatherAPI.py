@@ -5,4 +5,4 @@ def current_weather_api():
     response = requests.get(url)
     data = response.json()
 
-    return f"{data['current_weather']['temperature']}"
+    return f"{data['current_weather']['temperature']}"  # takes current temperature from the data

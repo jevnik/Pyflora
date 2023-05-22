@@ -8,14 +8,14 @@ class sunlight_sensor:
     def __init__(self):
         self.days = 0
         self.sunlight = 0
+
         def generate_soil_sunlight_function():
-            # Generate data for x-axis (time)
+            # Generate data for x-axis (days)
             days = [(-1)*x for x in range(30)]
             
-            # Generate data for y-axis (soil sunlight) with randomness
             sunlight = []
             a = r.randint(0,5000)
-            for i in range(len(days)):
+            for i in range(len(days)):  # Generate data for y-axis (soil sunlight) with randomness
                 a = a + r.choice((-1,1))*r.randint(0,100)
                 if a < 0:
                     a = 0
@@ -28,8 +28,8 @@ class sunlight_sensor:
     
     def plot_line(self,req):
         req = [req for x in range(30)]
-        plt.plot(self.days,req,label="Required")
-        plt.plot(self.days, self.sunlight,label="Measured sunlight")
+        plt.plot(self.days,req,label="Required")    # plots required
+        plt.plot(self.days, self.sunlight,label="Measured sunlight")    # plots sensor data
         plt.legend()
         plt.xlabel('Time')
         plt.ylabel('sunlight')
@@ -43,14 +43,14 @@ class humidity_sensor:
         self.humidity = 0
         def generate_soil_humidity_function():
 
-            # Generate data for x-axis (time)
-            days = [x*(-1) for x in range(30)]
-            # Generate data for y-axis (soil humidity) with randomness
+            
+            days = [x*(-1) for x in range(30)]  # Generate data for x-axis (days)
+            
             humidity = []
             a = r.randint(25,75)
-            for i in range(len(days)):
+            for i in range(len(days)):  # Generate data for y-axis (soil humidity) with randomness
                 a = a + -1*r.randint(0,10)
-                if a > 100:
+                if a > 100:     # humidity cant go over 100%
                     a = 100
                 elif a < 0:
                     a = 0
@@ -82,14 +82,15 @@ class salinity_sensor:
     def __init__(self):
         self.days = 0
         self.salinity = 0
+
         def generate_soil_salinity_function():
-            # Generate data for x-axis (time)
-            days = [(-1)*x for x in range(30)]
             
-            # Generate data for y-axis (soil salinity) with randomness
+            days = [(-1)*x for x in range(30)]  # Generate data for x-axis (time)
+            
+            
             salinity = []
-            a = r.random()/10
-            for i in range(len(days)):
+            a = r.random()/10   
+            for i in range(len(days)):  # Generate data for y-axis (soil salinity) with randomness
                 a = a + r.choice((-1,1))*r.random()/100
                 if a < 0:
                     a = 0
