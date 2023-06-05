@@ -25,7 +25,7 @@ class Vase(tk.Frame):   # Vase will inherit from tk.Frame soo it can be displaye
             self.sunlight_data = sunlight_sensor()
             self.sunlight = self.sunlight_data.sunlight[0]
             self.salinity_data = salinity_sensor()
-            self.salinity = round(self.salinity_data.salinity[0],3)     # salinitiy is measured i ntenth of a precent so it will be a rounded float
+            self.salinity = round(self.salinity_data.salinity[0],3)     # salinitiy is measured in tenth of a precent so it will be a rounded float
             self.ph_data = ph_sensor()
             self.ph = self.ph_data.ph[0]
             self.bind("<Button-1>", self.on_click_frame)
@@ -41,6 +41,7 @@ class Vase(tk.Frame):   # Vase will inherit from tk.Frame soo it can be displaye
 
                 add_plant_win = tk.Toplevel()
                 add_plant_win.geometry("300x700")
+                add_plant_win.attributes('-topmost',True)
                 
                 heading = tk.Label(add_plant_win,
                                    text="Adding plant",
@@ -127,23 +128,101 @@ class Vase(tk.Frame):   # Vase will inherit from tk.Frame soo it can be displaye
 
                 def save_plant_click(location_entry):   # gets called when a boutton to save a plant is clicked inside a adding plant window
                     global root
-                    conn = sqlite3.connect("plants.db")
-                    c = conn.cursor()
-                    c.execute(
-                                '''INSERT INTO plants (picture, name,vase_name,sunlight_amount, soil_humidity, substrate_recommendation, location,salinity,ph)
-                                VALUES (?, ?, ?, ?, ?, ?,?,?,?)''',
-                            (file_path,name_entry.get(),self.name,sunlight_entry.get(),humidity_entry.get(),sustrate_entry.get(),location_entry.get(),salinity_entry.get(),ph_entry.get()))
-                    conn.commit()
-                    conn.close()
+                    if (len(name_entry.get()) < 1 or
+                        len(humidity_entry.get()) < 1 or
+                        len(sunlight_entry.get()) < 1 or
+                        len(sustrate_entry.get()) < 1 or
+                        len(location_entry.get()) < 1 or
+                        len(salinity_entry.get()) < 1 or
+                        len(ph_entry.get()) < 1):
+                        
 
-                    self.name = location_entry.get()
+                        warning = tk.Label(add_plant_win,
+                                text="All entries\nneed\nto be filled",
+                                font=("Ink Free", 25),
+                                bg="#557b83")
+                        
+                        warning.place(x=65, y=170)
+                        add_plant_win.after(3000, lambda: warning.destroy())
 
-                    add_plant_win.destroy()
 
-                    root.destroy()              # this part refreshes main window (vase list)
-                    root = tk.Tk()
-                    root.geometry("1600x950")
-                    vase_list(root)
+                    elif not humidity_entry.get().isnumeric():
+                        
+                        warning = tk.Label(add_plant_win,
+                        text="Humidity entry\nmust be a whole number",
+                        font=("Ink Free", 20),
+                        bg="#557b83")
+                        
+                        warning.place(x=10, y=220)
+                        add_plant_win.after(3000, lambda: warning.destroy())
+
+
+                    elif not (0 < int(humidity_entry.get()) < 100):
+                        
+                        warning = tk.Label(add_plant_win,
+                        text="Humidity entry\nmust be a number\nbetween 0 and 100",
+                        font=("Ink Free", 20),
+                        bg="#557b83")
+                        
+                        warning.place(x=10, y=220)
+                        add_plant_win.after(3000, lambda: warning.destroy())
+
+
+
+                    elif not sunlight_entry.get().isnumeric():
+                        
+                        warning = tk.Label(add_plant_win,
+                        text="Sunlight entry\nmust be a whole number",
+                        font=("Ink Free", 20),
+                        bg="#557b83")
+                        
+                        warning.place(x=0, y=220)
+                        add_plant_win.after(3000, lambda: warning.destroy())
+                    
+                    elif not is_float(salinity_entry.get()):
+                        warning = tk.Label(add_plant_win,
+                        text="Salinity entry\nmust be a decimal number\nbetween 0 and 1",
+                        font=("Ink Free", 20),
+                        bg="#557b83")
+                        warning.place(x=0, y=250)
+                        add_plant_win.after(3000, lambda: warning.destroy())
+                    
+                    elif not (0 < float(salinity_entry.get()) < 1):                    
+                        warning = tk.Label(add_plant_win,
+                        text="Salinity entry\nmust be a decimal number\nbetween 0 and 1",
+                        font=("Ink Free", 20),
+                        bg="#557b83")
+                        warning.place(x=0, y=250)
+                        add_plant_win.after(3000, lambda: warning.destroy())
+
+                    elif not ph_entry.get().isnumeric():
+                        
+                        warning = tk.Label(add_plant_win,
+                        text="PH entry\nmust be a whole number",
+                        font=("Ink Free", 20),
+                        bg="#557b83")
+                        
+                        warning.place(x=0, y=280)
+                        add_plant_win.after(3000, lambda: warning.destroy())                    
+                    
+                    else:
+                        conn = sqlite3.connect("plants.db")
+                        c = conn.cursor()
+                        c.execute(
+                                    '''INSERT INTO plants (picture, name,vase_name,sunlight_amount, soil_humidity, substrate_recommendation, location,salinity,ph)
+                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                                (file_path,name_entry.get(),self.name,sunlight_entry.get(),humidity_entry.get(),sustrate_entry.get(),location_entry.get(),salinity_entry.get(),ph_entry.get()))
+                        conn.commit()
+                        conn.close()
+
+                        self.name = location_entry.get()
+
+                        add_plant_win.destroy()
+
+                        root.destroy()              # this part refreshes main window (vase list)
+                        root = tk.Tk()
+                        root.geometry("1600x950")
+                        vase_list(root)
 
                 add_button = tk.Button(add_plant_win,
                                        height=2,
@@ -279,32 +358,109 @@ class Vase(tk.Frame):   # Vase will inherit from tk.Frame soo it can be displaye
                 
                 def save_edited_plant_click(location_entry):    #Gets called when a button to save a edited plant is pressed inside edit platn window
                     global root
-                    
-                    conn = sqlite3.connect("plants.db")
-                    c = conn.cursor()
-                    c.execute(
-                                f'''UPDATE plants 
-                                    SET name = "{name_entry.get()}",
-                                    picture = "{file_path}",
-                                    vase_name = "{self.name}",
-                                    soil_humidity = "{humidity_entry.get()}",
-                                    sunlight_amount = "{sunlight_entry.get()}",
-                                    substrate_recommendation = "{substrate_entry.get()}",
-                                    location = "{location_entry.get()}",
-                                    salinity = "{salinity_entry.get()}",
-                                    ph = "{ph_entry.get()}"
-                                    WHERE vase_name = "{self.name}"''')
-                    conn.commit()
-                    conn.close()
+                    if (len(name_entry.get()) < 1 or
+                        len(humidity_entry.get()) < 1 or
+                        len(sunlight_entry.get()) < 1 or
+                        len(substrate_entry.get()) < 1 or
+                        len(location_entry.get()) < 1 or
+                        len(salinity_entry.get()) < 1 or
+                        len(ph_entry.get()) < 1):
+                        
 
-                    self.name = location_entry.get()
-                    
-                    edit_plant_win.destroy()
+                        warning = tk.Label(edit_plant_win,
+                                text="All entries\nneed\nto be filled",
+                                font=("Ink Free", 25),
+                                bg="#557b83")
+                        
+                        warning.place(x=65, y=170)
+                        edit_plant_win.after(3000, lambda: warning.destroy())
 
-                    root.destroy()
-                    root = tk.Tk()
-                    root.geometry("1600x950")
-                    vase_list(root)            
+
+                    elif not humidity_entry.get().isnumeric():
+                        
+                        warning = tk.Label(edit_plant_win,
+                        text="Humidity entry\nmust be a whole number",
+                        font=("Ink Free", 20),
+                        bg="#557b83")
+                        
+                        warning.place(x=10, y=220)
+                        edit_plant_win.after(3000, lambda: warning.destroy())
+
+
+                    elif not (0 < int(humidity_entry.get()) < 100):
+                        
+                        warning = tk.Label(edit_plant_win,
+                        text="Humidity entry\nmust be a number\nbetween 0 and 100",
+                        font=("Ink Free", 20),
+                        bg="#557b83")
+                        
+                        warning.place(x=10, y=220)
+                        edit_plant_win.after(3000, lambda: warning.destroy())
+
+
+
+                    elif not sunlight_entry.get().isnumeric():
+                        
+                        warning = tk.Label(edit_plant_win,
+                        text="Sunlight entry\nmust be a whole number",
+                        font=("Ink Free", 20),
+                        bg="#557b83")
+                        
+                        warning.place(x=0, y=220)
+                        edit_plant_win.after(3000, lambda: warning.destroy())
+                    
+                    elif not is_float(salinity_entry.get()):
+                        warning = tk.Label(edit_plant_win,
+                        text="Salinity entry\nmust be a decimal number\nbetween 0 and 1",
+                        font=("Ink Free", 20),
+                        bg="#557b83")
+                        warning.place(x=0, y=250)
+                        edit_plant_win.after(3000, lambda: warning.destroy())
+                    
+                    elif not (0 < float(salinity_entry.get()) < 1):                    
+                        warning = tk.Label(edit_plant_win,
+                        text="Salinity entry\nmust be a decimal number\nbetween 0 and 1",
+                        font=("Ink Free", 20),
+                        bg="#557b83")
+                        warning.place(x=0, y=250)
+                        edit_plant_win.after(3000, lambda: warning.destroy())
+
+                    elif not ph_entry.get().isnumeric():
+                        
+                        warning = tk.Label(edit_plant_win,
+                        text="PH entry\nmust be a whole number",
+                        font=("Ink Free", 20),
+                        bg="#557b83")
+                        
+                        warning.place(x=0, y=280)
+                        edit_plant_win.after(3000, lambda: warning.destroy())                    
+                    
+                    else:
+                        conn = sqlite3.connect("plants.db")
+                        c = conn.cursor()
+                        c.execute(
+                                    f'''UPDATE plants 
+                                        SET name = "{name_entry.get()}",
+                                        picture = "{file_path}",
+                                        vase_name = "{self.name}",
+                                        soil_humidity = "{humidity_entry.get()}",
+                                        sunlight_amount = "{sunlight_entry.get()}",
+                                        substrate_recommendation = "{substrate_entry.get()}",
+                                        location = "{location_entry.get()}",
+                                        salinity = "{salinity_entry.get()}",
+                                        ph = "{ph_entry.get()}"
+                                        WHERE vase_name = "{self.name}"''')
+                        conn.commit()
+                        conn.close()
+
+                        self.name = location_entry.get()
+                        
+                        edit_plant_win.destroy()
+
+                        root.destroy()
+                        root = tk.Tk()
+                        root.geometry("1600x950")
+                        vase_list(root)            
 
                 edit_button = tk.Button(edit_plant_win,
                                         height=2,
@@ -337,7 +493,7 @@ class Vase(tk.Frame):   # Vase will inherit from tk.Frame soo it can be displaye
             else:
                 more_info = tk.Toplevel()
                 more_info.configure(bg="#557b83")
-                more_info.geometry("575x950")
+                more_info.geometry("600x950")
 
                 heading = tk.Label(more_info,
                                    text="Information about a plant",
@@ -463,7 +619,7 @@ class Vase(tk.Frame):   # Vase will inherit from tk.Frame soo it can be displaye
 
 
 
-class Plant:    #Object that will represent a plants that get added to the vases objects
+class Plant:    #Object that will represent plants that get added to the vases objects
     def __init__(self,plant_name,photo_path,needed_humidity,needed_light,substrate_recom,location,salinity,ph):
         self.id = 0
         self.name = plant_name
@@ -674,7 +830,7 @@ def vase_list(root):
     c.execute("SELECT * FROM plants")
     database_rows = c.fetchall()
 
-    for plant in database_rows: # stores data from dataabse into a list
+    for plant in database_rows: # stores data from database into a list
           frames[plant[0]-1].name = plant[3]
           frames[plant[0]-1].plant = Plant(plant[1],plant[2],plant[4],plant[5],plant[6],plant[7],plant[8],plant[9])
         
@@ -737,6 +893,14 @@ def vase_list(root):
                              font=("Ink Free",15))
     
     curr_wheather.grid(row=4,column=0,columnspan=columns,sticky="s")
+
+def is_float(string):
+    try:
+        float(string)
+        return True
+    except ValueError:
+        return False
+
 
 def main():
     global root
